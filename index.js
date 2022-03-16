@@ -10,6 +10,9 @@ import os from 'os'
 import Tought from './models/Tought.js'
 import User from './models/User.js'
 
+import toughtsRoutes from './routes/toughtsRoutes.js'
+import ToughtsController from './controllers/ToughtsController.js'
+
 const app = express()
 
 app.engine('handlebars', engine())
@@ -50,6 +53,10 @@ app.use((req, res, next) => {
     next()
 })
 
+app.use('/toughts', toughtsRoutes)
+
+app.get('/', ToughtsController.showToughts)
+
 connection
     .sync()
     .then(
@@ -57,4 +64,4 @@ connection
             console.log('listening on http://localhost:3000')
         })
     )
-    .catch()
+    .catch((error) => console.error(error))
