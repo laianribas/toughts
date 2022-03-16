@@ -7,6 +7,9 @@ import connection from './db/connection.js'
 import path from 'path'
 import os from 'os'
 
+import Tought from './models/Tought.js'
+import User from './models/User.js'
+
 const app = express()
 
 app.engine('handlebars', engine())
