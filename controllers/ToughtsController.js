@@ -7,7 +7,25 @@ export default class ToughtsController {
     }
 
     static async dashboard(req, res) {
-        res.render('toughts/dashboard')
+        const userId = req.session.userid
+        const user = await User.findOne({
+            where: {
+                id: userId
+            },
+            include: Tought,
+            plain: true
+        })
+
+        if (!user) {
+            res.redirect('/login')
+        }
+        const toughts = user.Toughts.map((result) => result.dataValues)
+
+        if (toughts.length === 0) {
+            req.flash('message', 'Você não possui pensamentos registrados!')
+        }
+
+        res.render('toughts/dashboard', { toughts })
     }
 
     static createTought(req, res) {
@@ -24,6 +42,27 @@ export default class ToughtsController {
             await Tought.create(tought)
 
             req.flash('message', 'Pensamento criado com sucesso!')
+
+            req.session.save(() => {
+                res.redirect('/toughts/dashboard')
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    static async removeTought(req, res) {
+        const { id } = req.body
+        const { userid } = req.session
+
+        try {
+            await Tought.destroy({
+                where: {
+                    id: id,
+                    UserId: userid
+                }
+            })
+            req.flash('message', 'Pensamento Removido com sucesso!')
 
             req.session.save(() => {
                 res.redirect('/toughts/dashboard')
