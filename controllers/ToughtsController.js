@@ -51,6 +51,41 @@ export default class ToughtsController {
         }
     }
 
+    static async updateTought(req, res) {
+        const { id } = req.params
+        const tought = await Tought.findOne({
+                where: {
+                    id: id
+                },
+                raw: true
+            })
+            // console.log(tought)
+        res.render('toughts/edit', { tought })
+    }
+
+    static async updateToughtSave(req, res) {
+        const { id } = req.body
+
+        const tought = {
+            title: req.body.title
+        }
+
+        try {
+            await Tought.update(tought, {
+                where: {
+                    id: id
+                }
+            })
+            req.flash('message', 'Pensamento atualizado com sucesso!')
+
+            req.session.save(() => {
+                res.redirect('/toughts/dashboard')
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     static async removeTought(req, res) {
         const { id } = req.body
         const { userid } = req.session
