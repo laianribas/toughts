@@ -1,9 +1,43 @@
 import Tought from '../models/Tought.js'
 import User from '../models/User.js'
+import { Op } from 'sequelize'
 
 export default class ToughtsController {
     static async showToughts(req, res) {
-        res.render('toughts/home')
+        let search = ''
+        if (req.query.search) {
+            search = req.query.search
+        }
+
+        let order = 'DESC'
+
+        if (req.query.order === 'old') {
+            order = 'ASC'
+        } else {
+            order = 'DESC'
+        }
+        const toughts = (
+            await Tought.findAll({
+                include: User,
+                where: {
+                    title: {
+                        [Op.like]: `%${search}%`
+                    }
+                },
+                order: [
+                    ['createdAt', order]
+                ]
+            })
+        ).map((result) =>
+            result.get({
+                plain: true
+            })
+        )
+        let toughtsCount = toughts.length
+        if (toughtsCount === 0) {
+            toughtsCount = false
+        }
+        res.render('toughts/home', { toughts, search, toughtsCount })
     }
 
     static async dashboard(req, res) {
